@@ -9,7 +9,7 @@ from .conv import Conv
 from .block import Bottleneck
 
 
-class C2f_BiFocus(nn.Module):
+class C2f_BiFocus(nn.Module):#和c2f的区别就是末尾加了个bifocus
 
     def __init__(self, c1, c2, n=1, shortcut=False, g=1, e=0.5):  # ch_in, ch_out, number, shortcut, groups, expansion
         super().__init__()
@@ -35,7 +35,9 @@ class C2f_BiFocus(nn.Module):
         return self.cv2(torch.cat(y, 1))
 
 
-class BiFocus(nn.Module):
+class BiFocus(nn.Module):#x-focush-concat-depthwise
+    #                     |-focusv--|
+    #                     |---------|
     def __init__(self, c1, c2):
         super().__init__()
         self.focus_h = FocusH(c1, c1, 3, 1)
@@ -46,7 +48,7 @@ class BiFocus(nn.Module):
         return self.depth_wise(torch.cat([x, self.focus_h(x), self.focus_v(x)], dim=1))
 
 
-class FocusH(nn.Module):
+class FocusH(nn.Module):#宽度拆开实现水平焦点，卷积后再拼接回
 
     def __init__(self, c1, c2, kernel=3, stride=1):
         super().__init__()
@@ -74,7 +76,7 @@ class FocusH(nn.Module):
         return result
 
 
-class FocusV(nn.Module):
+class FocusV(nn.Module):#高度拆开实现垂直焦点，卷积后再拼接回
 
     def __init__(self, c1, c2, kernel=3, stride=1):
         super().__init__()
@@ -102,7 +104,7 @@ class FocusV(nn.Module):
         return result
 
 
-class DepthWiseConv(nn.Module):
+class DepthWiseConv(nn.Module):#深度可分离卷积：通道卷积+逐点卷积
 
     def __init__(self, in_channel, out_channel, kernel):
         super(DepthWiseConv, self).__init__()
